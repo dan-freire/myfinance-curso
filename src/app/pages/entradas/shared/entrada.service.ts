@@ -2,54 +2,54 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { Categoria } from './categoria.model';
+import { Entrada } from './entrada.model';
 
 @Injectable({
   providedIn: 'root'
 })
-export class CategoriaService {
+export class EntradaService {
 
-  private apiPath = 'api/categorias';
+  private apiPath = 'api/entradas';
 
   constructor(private http: HttpClient) { }
 
-  getAll(): Observable<Categoria[]> {
+  getAll(): Observable<Entrada[]> {
 
     return this.http.get(this.apiPath)
       .pipe(
         catchError(this.handleError),
-        map(this.jsonDataToCategorias)
+        map(this.jsonDataToEntradas)
       );
   }
 
-  getById(id: number): Observable<Categoria> {
+  getById(id: number): Observable<Entrada> {
   
     const url = `${this.apiPath}/${id}`;
 
     return this.http.get(url)
       .pipe(
         catchError(this.handleError),
-        map(this.jsonDataToCategoria)
+        map(this.jsonDataToEntrada)
       );
   }
 
-  create(categoria: Categoria): Observable<Categoria> {
+  create(entrada: Entrada): Observable<Entrada> {
 
-    return this.http.post(this.apiPath, categoria)
+    return this.http.post(this.apiPath, entrada)
       .pipe(catchError(
         this.handleError),
-        map(this.jsonDataToCategoria)
+        map(this.jsonDataToEntrada)
       );
   }
 
-  update(categoria: Categoria): Observable<Categoria> {
+  update(entrada: Entrada): Observable<Entrada> {
 
-    const url = `${this.apiPath}/${categoria.id}`;
+    const url = `${this.apiPath}/${entrada.id}`;
     
-    return this.http.put(url, categoria)
+    return this.http.put(url, entrada)
       .pipe(catchError(
         this.handleError),
-        map(() => categoria)
+        map(() => entrada)
       );
   }
 
@@ -64,18 +64,18 @@ export class CategoriaService {
       );
   }
 
-  private jsonDataToCategorias(jsonData: any[]): Categoria[] {
+  private jsonDataToEntradas(jsonData: any[]): Entrada[] {
     
-    const categorias: Categoria[] = [];
+    const entradas: Entrada[] = [];
 
-    jsonData.forEach(elemento => categorias.push(elemento as Categoria));
+    jsonData.forEach(elemento => entradas.push( Object.assign(new Entrada(), elemento) ));
 
-    return categorias;
+    return entradas;
   }
 
-  private jsonDataToCategoria(jsonData: any): Categoria {
+  private jsonDataToEntrada(jsonData: any): Entrada {
     
-    return jsonData as Categoria;
+    return Object.assign(new Entrada(), jsonData);
   }
 
   private handleError(error: any): Observable<any> {
