@@ -22,6 +22,10 @@ export class Entrada extends BaseResourceModel {
         receita: 'Receita'
     }
 
+    public static fromJson(jsonData: any): Entrada {
+        return Object.assign(new Entrada(), jsonData);
+    }
+
     get pagoTexto(): string {
         return this.pago ? 'Pago' : 'Pendente';
     }

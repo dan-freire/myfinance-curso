@@ -142,7 +142,7 @@ export class FormEntradaComponent implements OnInit, AfterContentChecked {
 
   private criarEntrada() {
 
-    const entrada = Object.assign(new Entrada(), this.entradaForm.value);
+    const entrada = Entrada.fromJson(this.entradaForm.value);
 
     this.entradaService.create(entrada)
       .subscribe(
@@ -153,7 +153,7 @@ export class FormEntradaComponent implements OnInit, AfterContentChecked {
 
   private editarEntrada() {
 
-    const entrada = Object.assign(new Entrada(), this.entradaForm.value);
+    const entrada = Entrada.fromJson(this.entradaForm.value);
 
     this.entradaService.update(entrada)
       .subscribe(
