@@ -1,29 +1,20 @@
-import { AfterContentChecked, Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, Injector, OnInit } from '@angular/core';
+import {  Validators } from '@angular/forms';
 
 import { Entrada } from '../shared/entrada.model';
 import { EntradaService } from '../shared/entrada.service';
 
-import { switchMap } from 'rxjs/operators';
-import toastr from 'toastr';
-
 import { Categoria } from '../../categorias/shared/categoria.model';
 import { CategoriaService } from '../../categorias/shared/categoria.service';
+import { BaseResourceFormComponent } from 'src/app/shared/components/base-resource-form/base-resource-form.component';
 
 @Component({
   selector: 'app-form-entrada',
   templateUrl: './form-entrada.component.html',
   styleUrls: ['./form-entrada.component.css']
 })
-export class FormEntradaComponent implements OnInit, AfterContentChecked {
+export class FormEntradaComponent extends BaseResourceFormComponent<Entrada> implements OnInit {
 
-  currentAction: string;
-  pageTitle: string;
-  entradaForm: FormGroup;
-  serverErrorMessages: string[];
-  submittingForm: boolean = false;
-  entrada: Entrada = new Entrada();
   categorias: Array<Categoria>;
 
   imaskConfig = {
@@ -50,33 +41,18 @@ export class FormEntradaComponent implements OnInit, AfterContentChecked {
   }
 
   constructor(
-    private entradaService: EntradaService,
-    private categoriaService: CategoriaService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private formBuilder: FormBuilder
-  ) { }
+    protected entradaService: EntradaService,
+    protected categoriaService: CategoriaService,
+    protected injector: Injector
+  ) {
+    super(injector, new Entrada(), entradaService, Entrada.fromJson);
+  }
   
   ngOnInit() {
-    this.setCurrentAction();
-    this.buildEntradaForm();
-    this.loadEntrada();
     this.loadCategorias();
+    super.ngOnInit();
   }
   
-  ngAfterContentChecked(): void {
-    this.setPageTitle();
-  }
-
-  submitForm() {
-    this.submittingForm = true;
-
-    if (this.currentAction == 'novo')
-      this.criarEntrada();
-    else
-      this.editarEntrada();
-  }
-
   get tipoCategoriaOptions(): Array<any> {
     
     return Object.entries(Entrada.tipos)
@@ -88,17 +64,9 @@ export class FormEntradaComponent implements OnInit, AfterContentChecked {
       })
   }
 
-  private setCurrentAction() {
+  protected buildResourceForm() {
 
-    if (this.route.snapshot.url[0].path == 'novo')
-      this.currentAction = 'novo';
-    else
-      this.currentAction = 'editar';
-  }
-
-  private buildEntradaForm() {
-
-    this.entradaForm = this.formBuilder.group({
+    this.resourceForm = this.formBuilder.group({
       id: [null],
       nome: [null, [Validators.required, Validators.minLength(2)]],
       descricao: [null],
@@ -109,77 +77,18 @@ export class FormEntradaComponent implements OnInit, AfterContentChecked {
       categoriaId: [null, [Validators.required]]
     })
   }
-  
-  private loadEntrada() {
 
-    if (this.currentAction == 'editar') {
+  protected edicaoTituloPagina(): string {
+    const nomeEntrada = this.resource.nome || '';
+    return `Editando Lançamento: ${nomeEntrada}`;
+  }
 
-      this.route.paramMap.pipe(
-        switchMap(params => this.entradaService.getById(+params.get('id')))
-      )
-      .subscribe(entrada => {
-        this.entrada = entrada;
-        this.entradaForm.patchValue(entrada) // binds loaded entrada
-      },
-      error => alert('Ocorreu um erro ao carregar entrada'))
-    }
+  protected criacaoTituloPagina(): string {
+    return 'Cadastro de novo Lançamento';
   }
 
   private loadCategorias() {
     this.categoriaService.getAll()
       .subscribe(categorias => this.categorias = categorias);
   }
-
-  private setPageTitle() {
-
-    if (this.currentAction == 'novo')
-      this.pageTitle = 'Cadastro de novo Lançamento';
-    else {
-      const nomeEntrada = this.entrada.nome || '';
-      this.pageTitle = `Editando Lançamento: ${nomeEntrada}`;
-    }
-  }
-
-  private criarEntrada() {
-
-    const entrada = Entrada.fromJson(this.entradaForm.value);
-
-    this.entradaService.create(entrada)
-      .subscribe(
-        entrada => this.actionForSuccess(entrada),
-        error => this.actionForError(error)
-      )
-  }
-
-  private editarEntrada() {
-
-    const entrada = Entrada.fromJson(this.entradaForm.value);
-
-    this.entradaService.update(entrada)
-      .subscribe(
-        entrada => this.actionForSuccess(entrada),
-        error => this.actionForError(error)
-      )
-  }
-
-  private actionForSuccess(entrada: Entrada) {
-
-    toastr.success('Solicitação processada com sucesso!');
-
-    this.router.navigateByUrl('entradas', { skipLocationChange: true })
-      .then( () => this.router.navigate(['entradas', entrada.id, 'editar']) );
-  }
-
-  private actionForError(error: any) {
-
-    toastr.error('Ocorreu um erro ao processar a sua solicitação!');
-
-    this.submittingForm = false;
-
-    if (error.status === 422)
-      this.serverErrorMessages = JSON.parse(error._body).errors;
-    else
-      this.serverErrorMessages = ['Falha na comunicação com o servidor. Por favor, tente mais tarde.'];
-  }
-
 }
