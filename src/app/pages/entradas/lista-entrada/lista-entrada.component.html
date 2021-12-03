@@ -28,7 +28,7 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let entrada of entradas">
+    <tr *ngFor="let entrada of resources">
       <td>
         <strong>{{entrada.nome}}</strong><br>
         <small class="text-success">{{entrada.data}}</small><br>
@@ -43,7 +43,7 @@
       </td>
       <td class="text-center">
         <a [routerLink]="[entrada.id, 'editar']" class="btn btn-outline-info btn-sm mr-2">Editar</a>
-        <button (click)="excluirEntrada(entrada)" class="btn btn-danger btn-sm">Excluir</button>
+        <button (click)="excluirResource(entrada)" class="btn btn-danger btn-sm">Excluir</button>
       </td>
     </tr>
   </tbody>

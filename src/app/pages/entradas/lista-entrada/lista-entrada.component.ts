@@ -1,4 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+
+import { BaseResourceListComponent } from 'src/app/shared/components/base-resource-list/base-resource-list.component';
+
 import { Entrada } from '../shared/entrada.model';
 import { EntradaService } from '../shared/entrada.service';
 
@@ -7,29 +10,9 @@ import { EntradaService } from '../shared/entrada.service';
   templateUrl: './lista-entrada.component.html',
   styleUrls: ['./lista-entrada.component.css']
 })
-export class ListaEntradaComponent implements OnInit {
+export class ListaEntradaComponent extends BaseResourceListComponent<Entrada> {
 
-  entradas: Entrada[] = [];
-
-  constructor(private entradaService: EntradaService) { }
-
-  ngOnInit() {
-    this.entradaService.getAll()
-      .subscribe(entradas => this.entradas = entradas.sort((a, b) => b.id - a.id),
-        error => alert('Erro ao carregar a lista de entradas. ' + error))
+  constructor(protected entradaService: EntradaService) {
+    super(entradaService);
   }
-
-  excluirEntrada(entrada: Entrada) {
-
-    const deveExcluir = confirm('Deseja realmente excluir essa entrada?');
-
-    if (deveExcluir) {
-
-      this.entradaService.delete(entrada.id)
-        .subscribe(
-          () => this.entradas = this.entradas.filter(elemento => elemento != entrada),
-          () => alert('Erro ao tentar excluir!'));
-    }
-  }
-
 }
