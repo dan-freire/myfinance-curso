@@ -1,5 +1,7 @@
 import { NgModule } from '@angular/core';
 
+import { ChartModule } from 'primeng/chart';
+
 import { SharedModule } from 'src/app/shared/shared.module';
 import { RelatoriosRoutingModule } from './relatorios-routing.module';
 import { RelatoriosComponent } from './relatorios/relatorios.component';
@@ -10,7 +12,8 @@ import { RelatoriosComponent } from './relatorios/relatorios.component';
   ],
   imports: [
     SharedModule,
-    RelatoriosRoutingModule
+    RelatoriosRoutingModule,
+    ChartModule
   ]
 })
 export class RelatoriosModule { }
